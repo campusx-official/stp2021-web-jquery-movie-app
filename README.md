@@ -1,2 +1,2 @@
 # stp2021-web-jquery-movie-app
-Code for the movie app project
+Check out the working demo : https://campusx-official.github.io/stp2021-web-jquery-movie-app/index.html
