@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Movie Description</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="crossorigin="anonymous"></script>
+</head>
+<script type="text/javascript">
+	$(document).ready(function(){
+		// fetch the movie id
+		var url = window.location.search;
+		var urlParams = new URLSearchParams(url);
+		var movie_id = urlParams.get('id');
+
+		// hit the api with the movie id
+		$.ajax({
+			url: `https://api.themoviedb.org/3/movie/${movie_id}?api_key=8265bd1679663a7ea12ac168da84d2e8&language=en-US`,
+			type : 'GET',
+			success: function(data){
+
+				var backdrop_path = 'https://image.tmdb.org/t/p/w500/' + data.backdrop_path;
+				var poster_path = 'https://image.tmdb.org/t/p/w500/' + data.poster_path;
+				var movie_name = data.title;
+				var release_date = data.release_date;
+				var runtime = data.runtime;
+				var tagline = data.tagline;
+				var overview = data.overview;
+
+				$('.jumbotron').css('background-image',`url(${backdrop_path})`);
+				console.log()
+
+				$('#poster').html(`<img src="${poster_path}" style="width: 100%;height:300px;border-radius: 10px">`);
+
+				$('#movie-name').html(movie_name);
+				$('#release-date').html(release_date);
+				$('#runtime').html(runtime + " mins");
+				$('#tagline').html(tagline);
+				$('#overview').html(overview);
+
+				var genres = '';
+
+				for(var i=0;i<data.genres.length;i++){
+					genres = genres + data.genres[i].name + ' ';
+				}
+
+				$('#genres').html(genres);
+				
+				// hit the recommendation api
+				$.ajax({
+					url : `https://api.themoviedb.org/3/movie/${movie_id}/similar?api_key=8265bd1679663a7ea12ac168da84d2e8&language=en-US`,
+					type : 'GET',
+					success: function(data){
+						for(var i = 0; i<6; i++){
+
+							var title = data.results[i].title;
+							var release_date = data.results[i].release_date;
+							var poster_url = 'https://image.tmdb.org/t/p/w500/' + data.results[i].poster_path;
+							var movie_id = data.results[i].id;
+
+							var output = `
+								<div class="col-2">
+									<img src="${poster_url}" style="width: 100%;height:250px">
+									<a href="movie_description.html?id=${movie_id}"><h5>${title}</h5></a>
+									<p class="text-muted">${release_date}</p>
+								</div>
+								`;
+							$('#display-movies').append(output);
+						}
+					},
+					error: function(error){
+						console.log(error);
+					}
+				})
+
+			},
+			error: function(error){
+				console.log(error);
+			}
+		})
+	})
+</script>
+<style type="text/css">
+	.bg-nav{
+		background-color: #032541;
+	}
+	.container{
+		max-width: 1300px;
+	}
+	.jumbotron{
+		background-image: url('https://image.tmdb.org/t/p/w500//lkInRiMtLgl9u9xE0By5hqf66K8.jpg');
+		background-repeat: no-repeat;
+		background-size: cover;
+		height: 400px;
+	}
+</style>
+<body>
+
+	<nav class="navbar bg-nav">
+		<h3 class="navbar-brand text-white"><b>MovieApp</b></h3>
+	</nav>
+
+	<div class="jumbotron">
+		<div class="container">
+			<div class="row">
+				<div class="col-4" id="poster">
+					
+				</div>
+				<div class="col-8 text-white">
+					<h1><span id="movie-name"><b></b></span> (2020)</h1>
+					<h5><span id="release-date"></span> <span id="genres"></span> <span id="runtime">2h 4m</span></h5>
+
+					<h5 id="tagline"></h5>
+					<h4 class="mt-5">Overview</h4>
+					<p id="overview"></p>
+				</div>
+			</div>
+		</div>
+		
+	</div>
+
+	<div class="container">
+		<h1 class="mb-5">Recommended Movies</h1>
+		<div class="row" id="display-movies">
+			
+		</div>
+	</div>
+
+</body>
+</html>
